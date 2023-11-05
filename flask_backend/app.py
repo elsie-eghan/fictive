@@ -7,7 +7,7 @@ from flask import render_template
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Replace with your actual secret key for session management
 
-openai.api_key = ''
+openai.api_key = ' '
 
 from flask import render_template
 
