@@ -97,12 +97,12 @@ def parse_story(text):
     choices = [choice.replace(' End.', '') for choice in choices]
 
     
-    dict = {
+    diction = {
         'chapter': chapter_number_title,
         'story': story_part,
         'choices': choices
     }
-    print(dict)
+    print(diction)
 
     return {
         'chapter': chapter_number_title,
