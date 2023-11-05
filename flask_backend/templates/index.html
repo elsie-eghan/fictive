@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Adventure</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Start Your Adventure</h1>
+    <div>
+        <label for="name">Enter your character's name:</label>
+        <input type="text" id="name" required>
+    </div>
+    <div>
+        <label for="appearance">Describe your character's appearance:</label>
+        <input type="text" id="appearance" required>
+    </div>
+    <div>
+        <label for="genre">Choose a genre:</label>
+        <select id="genre">
+            <option value="fantasy">Fantasy</option>
+            <option value="sci-fi">Sci-Fi</option>
+            <option value="mystery">Mystery</option>
+            <option value="adventure">Adventure</option>
+            <option value="horror">Horror</option>
+        </select>
+    </div>
+    <button id="start">Start Adventure</button>
+    <div id="adventure-container">
+        <h2 id="chapter"></h2>
+        <div id="story"></div>
+        <div id="choices"></div>
+    </div>
+
+    <script>
+        $(function() {
+            $('#start').on('click', function() {
+                startAdventure();
+            });
+
+            function startAdventure() {
+                const name = $('#name').val().trim();
+                const appearance = $('#appearance').val().trim();
+                const genre = $('#genre').val();
+
+                if (!name || !appearance) {
+                    alert('Please enter all details.');
+                    return;
+                }
+
+                $.ajax({
+                    url: '/start_adventure',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ name, appearance, genre }),
+                    success: function(response) {
+                        displayAdventure(response);
+                    },
+                    error: function() {
+                        alert('Error starting the adventure. Try again.');
+                    }
+                });
+            }
+            function continueAdventure(choice) {
+    // choice is a string, so we pass it directly as part of the POST data
+    $.ajax({
+        url: '/continue_adventure',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ choice: choice }),  // Send the choice string to the server
+        success: function(response) {
+            displayAdventure(response);
+        },
+        error: function() {
+            alert('Error continuing the adventure. Try again.');
+        }
+    });
+}
+
+
+            function displayAdventure(data) {
+    $('#chapter').text(data.chapter || 'No Chapter Info');
+    $('#story').text(data.story);
+
+    const choicesDiv = $('#choices');
+    choicesDiv.empty();
+
+    if (data.choices && data.choices.length > 0) {
+        data.choices.forEach(function(choice, index) {
+            // Since each choice is a string, we create a button with the choice as its text
+            const button = $('<button>').text(choice).on('click', function() {
+                continueAdventure(choice);  // When clicked, pass the choice string to continueAdventure
+            });
+            // Append a line break for visual separation between buttons (optional)
+            choicesDiv.append(button, $('<br>'));
+        });
+    } else {
+        choicesDiv.append($('<p>').text('No choices available.'));
+    }
+}
+
+        });
+    </script>
+</body>
+</html>
