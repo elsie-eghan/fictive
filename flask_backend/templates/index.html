@@ -28,6 +28,8 @@
         </select>
     </div>
     <button id="start">Start Adventure</button>
+    <button id="end">End Adventure</button>
+
     <div id="adventure-container">
         <h2 id="chapter"></h2>
         <div id="story"></div>
@@ -102,6 +104,31 @@ function displayAdventure(data) {
         choicesDiv.append($('<p>').text('No choices available.'));
     }
 }
+
+function endAdventure() {
+    // Send a request to the server to get the epilogue
+    $.ajax({
+        url: '/end_adventure',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ end: true }),
+        success: function(response) {
+            // Display the epilogue
+            $('#adventure-container').html(`<p>${response.epilogue}</p>`);
+            // Disable further interaction since the story has ended
+            $('#choices button').prop('disabled', true);
+            $('#end').prop('disabled', true);
+        },
+        error: function() {
+            alert('Error ending the adventure. Try again.');
+        }
+    });
+}
+
+$('#end').on('click', endAdventure);
+
+
+
 
 
         });

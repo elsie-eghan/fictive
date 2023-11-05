@@ -7,7 +7,7 @@ from flask import render_template
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Replace with your actual secret key for session management
 
-openai.api_key = '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'
+openai.api_key = ''
 
 from flask import render_template
 
@@ -72,6 +72,30 @@ def continue_adventure():
     # Instead of sending the entire chat log to the frontend, send only the new content
     # We parse this new content to extract the story, choices etc.
     return jsonify(parse_story(response['choices'][0]['message']['content']))
+
+@app.route('/end_adventure', methods=['POST'])
+def end_adventure():
+    # Construct the message for the epilogue
+    user_message = {
+        "role": "user",
+        "content": "get an epilogue"
+    }
+    
+    # Retrieve the full chat log from the session if needed for context
+    chat_log = session.get('chat_log', '')  # Get the chat log or empty string if it doesn't exist
+
+    # Send the epilogue command to GPT along with the chat log for context
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[{"role": "system", "content": "You are a helpful AI assisting in creating a story."}, {"role": "user", "content": chat_log}, user_message]
+    )
+
+    # Append the epilogue to the chat log in the session
+    session['chat_log'] += "\n" + response['choices'][0]['message']['content']
+
+    # Return the epilogue text to the frontend
+    return jsonify({'epilogue': response['choices'][0]['message']['content']})
+
 
 def parse_story(text):
    
