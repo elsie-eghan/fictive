@@ -7,7 +7,7 @@ from flask import render_template
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'  # Replace with your actual secret key for session management
 
-openai.api_key = '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'
+openai.api_key = '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'
 
 from flask import render_template
 
@@ -33,7 +33,7 @@ def start_adventure():
     # The user message with the initial story setup
     user_message = {
         "role": "user",
-        "content": f"Start a story about a character named {name} who looks like {appearance} in teh genre {genre}. Please create a story in the specified genre. Please format your response with the chapter name, then 'Story:' followed by the story text. Then 'Choices:' followed by the list of choices. End with 'End."
+        "content": f"Start a story about a character named {name} who looks like {appearance} in the genre {genre}. Please create a story in the specified genre. Please format your response with the chapter name, then 'Story:' followed by the story text. Then 'Choices:' followed by the list of choices. End with 'End."
     }
 
     messages = [system_message, user_message]
@@ -51,21 +51,27 @@ def continue_adventure():
     data = request.json
     user_input = data.get('choice')
 
+    # Retrieve the full chat log from the session
     chat_log = session.get('chat_log')
 
+    # Construct a new user message with the user's input
     user_message = {
         "role": "user",
         "content": user_input
     }
 
+    # Send the full chat log along with the new user message to GPT
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4",  # make sure to use "gpt-4" if that's what you've been using
         messages=[{"role": "system", "content": "You are a helpful AI creating a story in the genre of {genre}. Please format your response with the chapter name, then newline 'Story:' followed by the story text. Then 'Choices:' followed by the list of choices. End with 'End.'"}, {"role": "user", "content": chat_log}, user_message]
     )
-    
 
+    # Append the new content to the chat log in the session
     session['chat_log'] += "\n" + response['choices'][0]['message']['content']
-    return jsonify(parse_story(session['chat_log']))
+
+    # Instead of sending the entire chat log to the frontend, send only the new content
+    # We parse this new content to extract the story, choices etc.
+    return jsonify(parse_story(response['choices'][0]['message']['content']))
 
 def parse_story(text):
     # Regex pattern to extract the chapter title, assuming the format "Chapter X: Title"

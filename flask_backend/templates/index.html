@@ -62,7 +62,7 @@
                     }
                 });
             }
-            function continueAdventure(choice) {
+      function continueAdventure(choice) {
     // choice is a string, so we pass it directly as part of the POST data
     $.ajax({
         url: '/continue_adventure',
@@ -79,26 +79,29 @@
 }
 
 
-            function displayAdventure(data) {
-    $('#chapter').text(data.chapter || 'No Chapter Info');
+function displayAdventure(data) {
+    // Display the chapter in a designated element, such as <h2 id="chapter">
+    $('#chapter').html(data.chapter || 'No Chapter Info'); // Using .html() to render HTML if the chapter includes HTML tags like <strong>
+    // Display the story in a designated element, such as <div id="story">
     $('#story').text(data.story);
 
     const choicesDiv = $('#choices');
-    choicesDiv.empty();
+    choicesDiv.empty(); // Clear previous choices
 
+    // Loop through the choices and create buttons for each
     if (data.choices && data.choices.length > 0) {
         data.choices.forEach(function(choice, index) {
-            // Since each choice is a string, we create a button with the choice as its text
+            // Create a button for each choice
             const button = $('<button>').text(choice).on('click', function() {
-                continueAdventure(choice);  // When clicked, pass the choice string to continueAdventure
+                continueAdventure(choice); // Function to handle the choice click
             });
-            // Append a line break for visual separation between buttons (optional)
-            choicesDiv.append(button, $('<br>'));
+            choicesDiv.append(button); // Append the button to the choices div
         });
     } else {
         choicesDiv.append($('<p>').text('No choices available.'));
     }
 }
+
 
         });
     </script>
